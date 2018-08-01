@@ -16,10 +16,8 @@
     width: 420px;
 }
 .contMid {
-    height: 420px;
-    width: 420px;
+    width: 400px;
     margin: auto;
-    margin-bottom: 20px;
 }
 #canv {
     background-color: lightgrey;
