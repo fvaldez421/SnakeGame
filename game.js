@@ -240,7 +240,7 @@ $(document).ready(function () {
 			body++;
 			resetApple();
 		} else if (hx === bx && hy === by) { // if the head touches the banana, coors are randomized, body is allowed two more blocks
-			body = body + 5;
+			body = body + 3;
 			resetBanana();
 		}
 	}
