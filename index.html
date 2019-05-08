@@ -1,38 +1,41 @@
 <!doctype html>
 <html>
 
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
-            crossorigin="anonymous">
-        <link href="./index.css" rel="stylesheet">
-        <title>Snake Game!</title>
-    </head>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
+	 crossorigin="anonymous">
+	<link href="./index.css" rel="stylesheet">
+	<title>Snake Game!</title>
+</head>
 
-    <body>
-        <div class="main"></div>
-            <div class="jumbotron jumbotron-fluid">
-                <div class="col-md-8 ml-auto mr-auto">
-                    <h2>This is Snake!</h2>
-                    <hr class="my-4">
-                    <p>Use the arrow keys to start the game and navigate the snake. Each red fruit you eat will grow your snake by one
-                        block. Each yellow will grow it by two. Be careful not to bite your tail, hit a rock or hit an edge, the game will be completely reset.</p>
-                </div>
-            </div>
-            <div class="scoreBar">
-                <h4>Score:
-                    <span id="score"></span>
-                </h4>
-            </div>
-            <div class="contMid">
-                <canvas id="canv" height="320" width="400">
-                </canvas>
-            </div>
-        </div>
+<body>
+	<div class="main"></div>
+	<div class="jumbotron jumbotron-fluid">
+		<div class="col-md-8 ml-auto mr-auto">
+			<h2>This is Snake!</h2>
+			<hr class="my-4">
+			<p>Use the arrow keys to start the game and navigate the snake. Each red fruit you eat will grow your snake by one block.
+				Each yellow will grow it by two. Be careful not to bite your tail, hit a rock or hit an edge, the game will be completely
+				reset.
+			</p>
+		</div>
+	</div>
+	<div class="scoreBar">
+		<h4>Score:
+			<span id="score"></span>
+		</h4>
+	</div>
+	<div class="contMid">
+		<canvas id="canv" height="320" width="400">
+		</canvas>
+	</div>
+	</div>
 
-    </body>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="./game.js"></script>
+</body>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="./game.js"></script>
+<script src="./test.js"></script>
 
 </html>
