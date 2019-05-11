@@ -9,10 +9,8 @@ $(document).ready(function () {
 	let xd; // direction of x-axis
 	let yd; // direction of y-axis
 	const bl = 20; //working block size (20px)
-	const scaleX = 20;
-	const scaleY = 16;
 	let uniqueCoors = [];
-	let rocks;
+	let rocks = [];
 	let hx, hy, ax, ay, bx, by;
 	let head, apple, banana;
 
@@ -93,6 +91,7 @@ $(document).ready(function () {
 		xd = 0;
 		yd = 0;
 		paintCanvas();
+		$("#score").html(body - 1); // prints updated score (body - defaulted count of 1)
 		// paintGround()
 	}
 	/**
@@ -114,6 +113,17 @@ $(document).ready(function () {
 			uniqueCoors = uniqueCoors.filter(({ x, y }) => x !== segX || y !== segY);
 		}
 	}
+
+	/**
+	 * Tests that coors are unique
+	 * @param {object{}} coors 
+	 * @param {boolean} isRock 
+	 */
+	function isUnique(coors) {
+		const found = uniqueCoors.find(({ x, y }) => (coors.x === x && coors.y === y));
+		return !!found;
+	}
+
 	/**
 	 * Generates fresh/unique coordinates
 	 * @param {boolean} forRocks Enables different boundaries and
@@ -121,22 +131,36 @@ $(document).ready(function () {
 	 */
 	function generateCoors(forRocks) {
 		let testArr = [...uniqueCoors];
+		let coors = null;
 		if (forRocks) {
-			testArr = testArr.filter(({ x, y }) => x !== 380 && y !== 300);
+			testArr = testArr.filter(({ x, y }) => x < 360 && y < 280 && x !== 0 && y !== 0);
 		}
-		const randNum = Math.floor(Math.random() * testArr.length - 1);
-		let coors = testArr[randNum];
+		function getRand() {
+			const randNum = Math.floor(Math.random() * (testArr.length - 1));
+			return testArr[randNum] || null;
+		}
+		coors = getRand();
 		if (forRocks) {
-			const coorsArr = makeRock(coors);
-			coorsArr.forEach(updateUnique);
+			let clearsAll = true;
+			let blockArr = makeRock(coors);
+			blockArr.forEach(pair => {
+				let pass = isUnique(pair)
+				if (!pass) clearsAll = pass;
+			});
+			if (!clearsAll) {
+				coors = generateCoors(forRocks);
+				blockArr = makeRock(coors);
+			}
+			blockArr.forEach(updateUnique);
 		} else {
 			updateUnique(coors);
 		}
 		return coors;
 	}
 
-	function resetRocks() { // resets location of rocks. Do-While ensures a new, free open space
-		const nextRocks = [];
+	/** Resets the coordinates for rocks */
+	function resetRocks() {
+		rocks = [];
 		for (let i = 0; i < 3; i++) {
 			const coors = generateCoors(true); // forRocks bool is true on rock formation
 			if (coors) {
@@ -145,10 +169,9 @@ $(document).ready(function () {
 					x: { 1: x, 2: x + bl },
 					y: { 1: y, 2: y + bl },
 				};
-				nextRocks.push(rock);
+				rocks.push(rock);
 			}
 		}
-		rocks = nextRocks;
 	}
 
 	function resetHead() {
@@ -309,7 +332,6 @@ $(document).ready(function () {
 	};
 
 	function refresh() {
-		console.log(uniqueCoors.length);
 		if (!xd && !yd) return;
 		hx += xd;
 		hy += yd;
@@ -335,28 +357,28 @@ $(document).ready(function () {
 		if (!cycleActive && gameInterval) {
 			cycleActive = true;
 			switch (event.keyCode) {
-				case 37:
+				case leftArrow:
 					if (lastDir !== 39) { // conditionals prevent doubling back
 						lastDir = 37;
 						xd = -1 * bl;
 						yd = 0;
 					}
 					break;
-				case 38:
+				case upArrow:
 					if (lastDir !== 40) {
 						lastDir = 38;
 						xd = 0;
 						yd = -1 * bl;
 					}
 					break;
-				case 39:
+				case rightArrow:
 					if (lastDir !== 37) {
 						lastDir = 39;
 						xd = 1 * bl;
 						yd = 0;
 					}
 					break;
-				case 40:
+				case downArrow:
 					if (lastDir !== 38) {
 						lastDir = 40;
 						xd = 0;
@@ -366,5 +388,4 @@ $(document).ready(function () {
 			}
 		}
 	}
-	// init(); // cycles game
 });
