@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
 	 crossorigin="anonymous">
 	<link href="./index.css" rel="stylesheet">
 	<title>Snake Game!</title>
@@ -22,20 +22,90 @@
 			</p>
 		</div>
 	</div>
-	<div class="scoreBar">
-		<h4>Score:
-			<span id="score"></span>
-		</h4>
-	</div>
 	<div class="contMid">
-		<canvas id="canv" height="320" width="400">
-		</canvas>
+		<h4>Score:
+			<span id="score">0</span>
+		</h4>
+		<div class="contentWrap">
+			<div class="optionsMenu p-2 menu-open">
+				<h5>Game Options:
+					<div id="menuToggle" class="genButton">
+						<span class="chevronUp">></span>
+					</div>
+				</h5>
+
+				<div class="selectContainer expandY">
+					<div>
+						<div class="form-group mb-2">
+							<label class="mb-1" for="fruitSelect">Fruits:</label>
+							<select id="fruitSelect" class="custom-select">
+								<option selected value="normal">Normal</option>
+								<option value="bonus">Bonus</option>
+								<option value="speed">Speed</option>
+							</select>
+						</div>
+						<div class="form-group mb-2">
+							<label class="mb-1" for="wallSelect">Walls:</label>
+							<select id="wallSelect" class="custom-select">
+								<option selected value="off">Off</option>
+								<option value="on">On</option>
+								<option value="tunnels">Tunnels</option>
+							</select>
+						</div>
+						<div class="form-group mb-3">
+							<label class="mb-1" for="obstacleSelect">Obstacles:</label>
+							<select id="obstacleSelect" class="custom-select">
+								<option selected value="off">Off</option>
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="5">5</option>
+							</select>
+						</div>
+						<button id="optionsComplete" class="btn btn-primary">Done</button>
+					</div>
+				</div>
+
+				<div class="optionsContainer collapseY">
+					<div>
+						<h6 class="mb-1">Fruits:
+							<span id="fruitLabel"></span>
+						</h6>
+						<h6 class="mb-1">Walls:
+							<span id="wallLabel"></span>
+						</h6>
+						<h6 class="mb-1">Obstacles:
+							<span id="obstacleLabel"></span>
+						</h6>
+					</div>
+				</div>
+			</div>
+
+			<div class="gameContainer">
+				<div class="instructions">
+					Press the Spacebar or click the "Start" button to start a new game
+				</div>
+				<canvas id="canv" height="320" width="400">
+				</canvas>
+			</div>
+
+		</div>
 	</div>
 	</div>
 
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+	 crossorigin="anonymous">
+	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+	 crossorigin="anonymous">
+	</script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+	 crossorigin="anonymous">
+	</script>
 </body>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
 <script src="./game.js"></script>
-<script src="./test.js"></script>
+<script src="./script.js"></script>
 
 </html>

@@ -1,29 +1,115 @@
+
 $(document).ready(function () {
 	const c = document.getElementById("canv");
 	const ctx = c.getContext("2d");
 	let grd;
-
-	let trail; // trail array will contain objects with x and y values
-	let body; //beggining length of tail
-	let lastDir; // last used direction (prevents doubling back)
-	let xd; // direction of x-axis
-	let yd; // direction of y-axis
-	const bl = 20; //working block size (20px)
-	let uniqueCoors = [];
-	let rocks = [];
-	let hx, hy, ax, ay, bx, by;
-	let head, apple, banana;
-
-	let gameOn = false;
-	let gameInterval;
-	let cycleActive = false;
-
+	
 	const spaceBar = 32;
 	const leftArrow = 37;
 	const upArrow = 38;
 	const rightArrow = 39;
 	const downArrow = 40;
 
+	let gameOn = window.gameOn = false;
+	let gameInterval;
+	let cycleActive = false;
+	let mode = 'standard';
+
+	let xd, yd;
+	let lastDir;
+	const bl = 20;
+	let uniqueCoors = [];
+	let rocks = [];
+
+	let head, apple, banana;
+	let hx, hy, ax, ay, bx, by;
+	let body;
+	let trail = [];
+
+  const startGameButton = $('#optionsComplete');
+	startGameButton.on('click', () => {
+		if (!gameInterval) {
+			start();
+		}
+		if (!gameOn) {
+			gameOn = true;
+			init();
+		}
+  })
+
+	/** Universal event listener */
+	$(document).on("keydown", function (event) {
+		const { keyCode } = event;
+		if (!gameInterval && keyCode === spaceBar) {
+			if (!gameInterval) {
+				start();
+			}
+			if (!gameOn) {
+				gameOn = true;
+				init();
+			}
+		} else if (isGameKey(keyCode)) {
+			if (keyCode === spaceBar && (xd !== 0 || yd !== 0)) {
+				pause();
+			} else if (keyCode !== spaceBar) {
+				return newDir(event);
+			}
+		}
+	});
+
+	/** Initializes a new game (resets all values) */
+	function init(isRetry) {
+		genBaseCoors();
+		if (!isRetry) {
+			lastDir = null;
+			body = 1;
+			trail = [];
+			xd = 0;
+			yd = 0;
+		}
+		resetRocks();
+		resetItem('head');
+		resetItem('apple');
+		resetItem('banana');
+		paintCanvas();
+		paintRocks();
+		paintApple();
+		paintBanana();
+		paintTrail();
+		paintHead();
+		$("#score").html(body - 1); // prints updated score (body - defaulted count of 1)
+	}
+
+	/** Game Cycle performs all 'turn' functions */
+	function refresh() {
+		console.log(window.gameOn, gameOn)
+		if (!xd && !yd) return;
+		const pastHead = {...head};
+		hx += xd;
+		hy += yd;
+		head = { x: hx, y: hy };
+		testTreats();
+		testBoundaries();
+		testCannibalism();
+		testObstacles();
+		
+		// creates tail on first game move
+		if (trail.length < 1) {
+			trail.push(pastHead);
+		}
+		
+		updateSnake(pastHead);
+		paintCanvas();
+		paintRocks();
+		paintApple();
+		paintBanana();
+		paintTrail();
+		paintHead();
+		$("#score").html(body - 1); // prints updated score (body - defaulted count of 1)
+		cycleActive = false;
+	}
+
+	/** Generates base unique coordinates */
 	function genBaseCoors() {
 		let x = 0;
 		let y = 0;
@@ -39,18 +125,25 @@ $(document).ready(function () {
 		}
 	};
 
-	const makeRock = ({ x, y }) => [
-		{ x, y },
-		{ x: x + bl, y },
-		{ x, y: y + bl },
-		{ x: x + bl, y: y + bl }
-	];
+	/** 
+	 * Returns an array of coordinates representing a rock 
+	 * @param {object{}} coors base unique coordinates 
+	 */
+	var makeRock = coors => {
+		const { x, y } = coors;
+		return [
+			{ x, y },
+			{ x: x + bl, y },
+			{ x, y: y + bl },
+			{ x: x + bl, y: y + bl }
+		]
+	};
 
 	/**
 	 * is key an arrow key or spacebar
 	 * @param {number} keyCode number of key in use
 	 */
-	const isGameKey = keyCode => (keyCode
+	var isGameKey = keyCode => (keyCode
 		&& keyCode === leftArrow
 		|| keyCode === upArrow
 		|| keyCode === rightArrow
@@ -58,51 +151,23 @@ $(document).ready(function () {
 		|| keyCode === spaceBar
 	);
 
-	$(document).on("keydown", function (event) {
-		const { keyCode } = event;
-		if (!gameInterval && keyCode === spaceBar) {
-			if (!gameInterval) {
-				gameInterval = setInterval(refresh, 400); //refreshes page every 400ms
-			}
-			if (!gameOn) {
-				gameOn = true;
-				init();
-			}
-		} else if (isGameKey(keyCode)) {
-			if (keyCode === spaceBar && (xd !== 0 || yd !== 0)) {
-				const pause = true;
-				stop(pause);
-			} else if (keyCode !== spaceBar) {
-				return newDir(event);
-			}
-		}
-	});
-
-	/** Initializes a new game (resets all values) */
-	function init() {
-		lastDir = null;
-		body = 1;
-		trail = [];
-		genBaseCoors();
-		resetRocks();
-		resetHead();
-		resetApple();
-		resetBanana();
-		xd = 0;
-		yd = 0;
-		paintCanvas();
-		$("#score").html(body - 1); // prints updated score (body - defaulted count of 1)
-		// paintGround()
-	}
-	/**
-	 * pauses or ends the game
-	 * @param {boolean} pause 
-	 */
-	function stop(pause) {
-		if (!pause) gameOn = false;
+	/** ends the game */
+	function endGame() {
+		gameOn = false;
 		clearInterval(gameInterval);
 		gameInterval = null;
 	}
+
+	/** pauses game */
+	function pause() {
+		clearInterval(gameInterval);
+		gameInterval = null;
+	}
+
+	function start() {
+		gameInterval = setInterval(refresh, 400);
+	}
+
 	/**
 	 * updates the set of uniqueCoors
 	 * @param {object} coors Set of coordinates to remove from uniqueCoors
@@ -174,45 +239,37 @@ $(document).ready(function () {
 		}
 	}
 
-	function resetHead() {
-		head = generateCoors();
-		hx = head.x;
-		hy = head.y;
+	function resetItem(item) {
+		if (item === 'head') {
+			head = generateCoors();
+			hx = head.x;
+			hy = head.y;
+		} else if (item === 'apple') {
+			apple = generateCoors();
+			ax = apple.x;
+			ay = apple.y;
+		} else if (item === 'banana') {
+			banana = generateCoors();
+			bx = banana.x;
+			by = banana.y;
+		}
 	}
 
-	function resetApple() {
-		apple = generateCoors();
-		ax = apple.x;
-		ay = apple.y;
-	}
-
-	function resetBanana() {
-		banana = generateCoors();
-		bx = banana.x;
-		by = banana.y;
-	}
-
-	function updateSnake(nextHead) {
+	function updateSnake(pastHead) {
 		// pushes updated head into trail
-		trail.unshift(nextHead);
-		updateUnique(nextHead);
+		// const nextHead = { x: hx, y: hy };
+		trail.unshift(pastHead);
+		updateUnique(pastHead);
 		// clears oldest block from trail, dependent on body count
 		while (trail.length > body) {
 			const freedCoors = trail.pop();
 			uniqueCoors.push(freedCoors);
 		}
-
 	}
 
 	function paintCanvas() {
 		ctx.fillStyle = "lightgrey";
 		ctx.fillRect(0, 0, 400, 320);
-
-		paintApple();
-		paintBanana();
-		paintHead();
-		paintTrail();
-		paintRocks();
 	}
 
 	function paintApple() {
@@ -261,20 +318,20 @@ $(document).ready(function () {
 	function testTreats() {
 		if (hx === ax && hy === ay) { // if the head touches the apple, coors are randomized, body is allows one more block
 			body++;
-			resetApple();
+			resetItem('apple');
 		} else if (hx === bx && hy === by) { // if the head touches the banana, coors are randomized, body is allowed two more blocks
 			body = body + 3;
-			resetBanana();
+			resetItem('banana');
 		}
 	}
 
-	function testBoundaries(mode = 'standard') {
+	function testBoundaries() {
 		let boundaryHit = false;
 		let value;
 		const easy = mode === 'easy';
 		const standard = mode === 'standard';
 		let easyAction = () => value;
-		let standardAction = () => stop();
+		let standardAction = () => endGame();
 		let onHit = () => console.log('No boundary action assigned');
 		if (easy) onHit = easyAction;
 		if (standard) onHit = standardAction;
@@ -292,8 +349,18 @@ $(document).ready(function () {
 			if (easy) value = (hy = 300);
 			boundaryHit = true;
 		}
-
 		if (boundaryHit) onHit();
+	}
+
+	function userFault() {
+		if (mode === 'easy') {
+			body = Math.floor(body/2);
+			init(mode === 'easy')
+			pause()
+		} else if (mode === 'standard') {
+			endGame();
+			console.log('fault!');
+		}
 	}
 
 	function testObstacles() {
@@ -301,8 +368,7 @@ $(document).ready(function () {
 			let { x, y } = rock;
 			for (let a = 1, b = 2; a < 3 && b > 0; a++ , b--) {
 				if ((x[a] === hx && y[a] === hy) || (x[a] === hx && y[b] === hy)) {
-					// body = 1; // previously set to reset progress
-					stop();
+					userFault();
 					paintHead();
 				}
 			}
@@ -313,9 +379,7 @@ $(document).ready(function () {
 		trail.forEach((block) => { // prints most current snake using coordinates inside trail array 
 			let { x, y } = block;
 			if (x === hx && y === hy && body > 1) { // if any trails coordinates match the head, the score is reset
-				// body = 1; // previously set to reset progress
-				stop();
-				return;
+				userFault();
 			}
 		});
 	}
@@ -331,56 +395,35 @@ $(document).ready(function () {
 		});
 	};
 
-	function refresh() {
-		if (!xd && !yd) return;
-		hx += xd;
-		hy += yd;
-
-		testTreats();
-		testBoundaries();
-		testObstacles();
-		testCannibalism();
-
-		// creates train on first game move
-		if (trail.length < 1) {
-			trail.push(head);
-		}
-
-		head = { x: hx, y: hy };
-		paintCanvas();
-		updateSnake(head);
-		$("#score").html(body - 1); // prints updated score (body - defaulted count of 1)
-		cycleActive = false;
-	}
-
-	function newDir(event) { // key listeners
+	/** Changes direction of snake (Map represents fourth quadrant in a cartesian plane) */
+	function newDir(event) {
 		if (!cycleActive && gameInterval) {
 			cycleActive = true;
 			switch (event.keyCode) {
 				case leftArrow:
-					if (lastDir !== 39) { // conditionals prevent doubling back
-						lastDir = 37;
+					if (lastDir !== rightArrow) { // conditionals prevent doubling back
+						lastDir = leftArrow;
 						xd = -1 * bl;
 						yd = 0;
 					}
 					break;
 				case upArrow:
-					if (lastDir !== 40) {
-						lastDir = 38;
+					if (lastDir !== downArrow) {
+						lastDir = upArrow;
 						xd = 0;
 						yd = -1 * bl;
 					}
 					break;
 				case rightArrow:
-					if (lastDir !== 37) {
-						lastDir = 39;
+					if (lastDir !== leftArrow) {
+						lastDir = rightArrow;
 						xd = 1 * bl;
 						yd = 0;
 					}
 					break;
 				case downArrow:
-					if (lastDir !== 38) {
-						lastDir = 40;
+					if (lastDir !== upArrow) {
+						lastDir = downArrow;
 						xd = 0;
 						yd = 1 * bl;
 					}
@@ -389,3 +432,4 @@ $(document).ready(function () {
 		}
 	}
 });
+
