@@ -119,7 +119,7 @@
     height: 320px;
     width: 400px;
 }
-.instructions {
+#instructions {
     position: absolute;
     top: 0;
     bottom: 0;

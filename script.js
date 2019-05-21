@@ -1,8 +1,9 @@
 $(document).ready(function () {
-  
+
   let toggling = false;
   const menuInterval = 700;
   let menuOpen = true;
+  let gameOn = false;
 
   const menuToggle = $('#menuToggle');
   const selectContainer = $('.selectContainer');
@@ -13,6 +14,20 @@ $(document).ready(function () {
     toggleMenu();
   });
 
+  startGameButton.on('click', () => {
+    console.log('startGame');
+    window.gameOn = true;
+  })
+
+  /** Universal game event listener */
+  $(document).on("keydown", function (event) {
+    const { keyCode } = event;
+    if (!gameOn && keyCode === 32) {
+      gameOn = true;
+      $('#instructions').attr('class', 'hidden');
+      toggleMenu();
+    }
+  });
 
   function toggleMenu() {
     if (toggling) return;

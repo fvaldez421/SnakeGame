@@ -3,17 +3,17 @@ $(document).ready(function () {
 	const c = document.getElementById("canv");
 	const ctx = c.getContext("2d");
 	let grd;
-	
+
 	const spaceBar = 32;
 	const leftArrow = 37;
 	const upArrow = 38;
 	const rightArrow = 39;
 	const downArrow = 40;
 
-	let gameOn = window.gameOn = false;
+	let gameOn = false;
 	let gameInterval;
 	let cycleActive = false;
-	let mode = 'standard';
+	let wallMode = 1;
 
 	let xd, yd;
 	let lastDir;
@@ -21,12 +21,12 @@ $(document).ready(function () {
 	let uniqueCoors = [];
 	let rocks = [];
 
-	let head, apple, banana;
+	let head, pastHead, apple, banana;
 	let hx, hy, ax, ay, bx, by;
 	let body;
 	let trail = [];
 
-  const startGameButton = $('#optionsComplete');
+	const startGameButton = $('#optionsComplete');
 	startGameButton.on('click', () => {
 		if (!gameInterval) {
 			start();
@@ -35,9 +35,9 @@ $(document).ready(function () {
 			gameOn = true;
 			init();
 		}
-  })
+	})
 
-	/** Universal event listener */
+	/** Universal game event listener */
 	$(document).on("keydown", function (event) {
 		const { keyCode } = event;
 		if (!gameInterval && keyCode === spaceBar) {
@@ -82,23 +82,22 @@ $(document).ready(function () {
 
 	/** Game Cycle performs all 'turn' functions */
 	function refresh() {
-		console.log(window.gameOn, gameOn)
 		if (!xd && !yd) return;
-		const pastHead = {...head};
+		pastHead = { ...head };
 		hx += xd;
 		hy += yd;
-		head = { x: hx, y: hy };
-		testTreats();
 		testBoundaries();
+		testTreats();
 		testCannibalism();
 		testObstacles();
-		
+		head = { x: hx, y: hy };
+
 		// creates tail on first game move
 		if (trail.length < 1) {
 			trail.push(pastHead);
 		}
-		
-		updateSnake(pastHead);
+
+		updateSnake();
 		paintCanvas();
 		paintRocks();
 		paintApple();
@@ -156,6 +155,7 @@ $(document).ready(function () {
 		gameOn = false;
 		clearInterval(gameInterval);
 		gameInterval = null;
+		console.log('endGame')
 	}
 
 	/** pauses game */
@@ -255,10 +255,8 @@ $(document).ready(function () {
 		}
 	}
 
-	function updateSnake(pastHead) {
-		// pushes updated head into trail
-		// const nextHead = { x: hx, y: hy };
-		trail.unshift(pastHead);
+	function updateSnake() {
+		trail = [pastHead, ...trail];
 		updateUnique(pastHead);
 		// clears oldest block from trail, dependent on body count
 		while (trail.length > body) {
@@ -326,41 +324,37 @@ $(document).ready(function () {
 	}
 
 	function testBoundaries() {
-		let boundaryHit = false;
-		let value;
-		const easy = mode === 'easy';
-		const standard = mode === 'standard';
-		let easyAction = () => value;
-		let standardAction = () => endGame();
-		let onHit = () => console.log('No boundary action assigned');
-		if (easy) onHit = easyAction;
-		if (standard) onHit = standardAction;
-
+		const easy = wallMode === 1;
+		const standard = wallMode === 2;
 		if (hx === 400) { // edge conditionals, used to be set to wrap around but are new set to recycle game.
-			if (easy) value = (hx = 0);
-			boundaryHit = true;
+			if (easy) {
+				hx = 0;
+			} else if (standard) {
+				endGame();
+			}
 		} else if (hx === -20) {
-			if (easy) value = (hx = 380);
-			boundaryHit = true;
+			if (easy) {
+				hx = 380;
+			} else if (standard) {
+				endGame();
+			}
 		} else if (hy === 320) {
-			if (easy) value = (hy = 0);
-			boundaryHit = true;
+			if (easy) {
+				hy = 0;
+			} else if (standard) {
+				endGame();
+			}
 		} else if (hy === -20) {
-			if (easy) value = (hy = 300);
-			boundaryHit = true;
+			if (easy) {
+				hy = 300;
+			} else if (standard) {
+				endGame();
+			}
 		}
-		if (boundaryHit) onHit();
 	}
 
 	function userFault() {
-		if (mode === 'easy') {
-			body = Math.floor(body/2);
-			init(mode === 'easy')
-			pause()
-		} else if (mode === 'standard') {
-			endGame();
-			console.log('fault!');
-		}
+		endGame();
 	}
 
 	function testObstacles() {
@@ -376,7 +370,8 @@ $(document).ready(function () {
 	}
 
 	function testCannibalism() {
-		trail.forEach((block) => { // prints most current snake using coordinates inside trail array 
+		trail.forEach((block, i) => { // prints most current snake using coordinates inside trail array 
+			if (i + 1 === trail.length) return;
 			let { x, y } = block;
 			if (x === hx && y === hy && body > 1) { // if any trails coordinates match the head, the score is reset
 				userFault();
