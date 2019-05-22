@@ -1,5 +1,8 @@
 
 $(document).ready(function () {
+	const storageSet = (key, value) => window.localStorage.setItem(key, value);
+	const storageGet = key => window.localStorage.getItem(key);
+
 	const c = document.getElementById("canv");
 	const ctx = c.getContext("2d");
 	let grd;
@@ -10,7 +13,6 @@ $(document).ready(function () {
 	const rightArrow = 39;
 	const downArrow = 40;
 
-	let gameOn = false;
 	let gameInterval;
 	let cycleActive = false;
 
@@ -37,14 +39,17 @@ $(document).ready(function () {
 	fruitSelect.on('change', e => {
 		fruitSetting = e.target.value;
 		$('#fruitHolder').html(fruitSetting);
+		storageSet('fruitSetting', fruitSetting);
 	});
 	wallSelect.on('change', e => {
 		wallSetting = e.target.value;
 		$('#wallHolder').html(wallSetting);
+		storageSet('wallSetting', wallSetting);
 	});
 	obstacleSelect.on('change', e => {
 		obstacleSetting = Number(e.target.value);
 		$('#obstacleHolder').html(obstacleSetting);
+		storageSet('obstacleSetting', obstacleSetting);
 	});
 
 	startGameButton.on('click', () => {
@@ -58,6 +63,28 @@ $(document).ready(function () {
 		}, 500);
 	});
 
+	function getDefaultOptions() {
+		const fruits = storageGet('fruitSetting');
+		const walls = storageGet('wallSetting');
+		const obs = storageGet('obstacleSetting');
+		if (fruits) {
+			fruitSetting = fruits;
+			fruitSelect.val(fruitSetting);
+			$('#fruitHolder').html(fruitSetting);
+		}
+		if (walls) {
+			wallSetting = walls;
+			wallSelect.val(wallSetting);
+			$('#wallHolder').html(wallSetting);
+		}
+		if (obs) {
+			obstacleSetting = obs;
+			obstacleSelect.val(obstacleSetting);
+			$('#obstacleHolder').html(obstacleSetting);
+		}
+	}
+	getDefaultOptions();
+	
 	/** Universal game event listener */
 	$(document).on("keydown", function (event) {
 		const { keyCode } = event;
@@ -188,7 +215,6 @@ $(document).ready(function () {
 		gameOn = false;
 		clearInterval(gameInterval);
 		gameInterval = null;
-		console.log('endGame')
 	}
 
 	/** pauses game */
