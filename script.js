@@ -15,19 +15,9 @@ $(document).ready(function () {
   });
 
   startGameButton.on('click', () => {
-    console.log('startGame');
-    window.gameOn = true;
+    $('#instructions').attr('class', 'hidden');
+    toggleMenu();
   })
-
-  /** Universal game event listener */
-  $(document).on("keydown", function (event) {
-    const { keyCode } = event;
-    if (!gameOn && keyCode === 32) {
-      gameOn = true;
-      $('#instructions').attr('class', 'hidden');
-      toggleMenu();
-    }
-  });
 
   function toggleMenu() {
     if (toggling) return;

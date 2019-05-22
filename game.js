@@ -13,7 +13,10 @@ $(document).ready(function () {
 	let gameOn = false;
 	let gameInterval;
 	let cycleActive = false;
-	let wallMode = 1;
+
+	let fruitSetting = 'normal';
+	let wallSetting = 'off';
+	let obstacleSetting = 0;
 
 	let xd, yd;
 	let lastDir;
@@ -21,21 +24,39 @@ $(document).ready(function () {
 	let uniqueCoors = [];
 	let rocks = [];
 
-	let head, pastHead, apple, banana;
+	let head, pastHead, apple, banana, orange;
 	let hx, hy, ax, ay, bx, by;
 	let body;
 	let trail = [];
 
 	const startGameButton = $('#optionsComplete');
+	const fruitSelect = $('#fruitSelect');
+	const wallSelect = $('#wallSelect');
+	const obstacleSelect = $('#obstacleSelect');
+
+	fruitSelect.on('change', e => {
+		fruitSetting = e.target.value;
+		$('#fruitHolder').html(fruitSetting);
+	});
+	wallSelect.on('change', e => {
+		wallSetting = e.target.value;
+		$('#wallHolder').html(wallSetting);
+	});
+	obstacleSelect.on('change', e => {
+		obstacleSetting = Number(e.target.value);
+		$('#obstacleHolder').html(obstacleSetting);
+	});
+
 	startGameButton.on('click', () => {
+		init();
 		if (!gameInterval) {
 			start();
 		}
-		if (!gameOn) {
-			gameOn = true;
-			init();
-		}
-	})
+		startGameButton.blur()
+		setTimeout(() => {
+			startGameButton.html('Reset');
+		}, 500);
+	});
 
 	/** Universal game event listener */
 	$(document).on("keydown", function (event) {
@@ -43,10 +64,6 @@ $(document).ready(function () {
 		if (!gameInterval && keyCode === spaceBar) {
 			if (!gameInterval) {
 				start();
-			}
-			if (!gameOn) {
-				gameOn = true;
-				init();
 			}
 		} else if (isGameKey(keyCode)) {
 			if (keyCode === spaceBar && (xd !== 0 || yd !== 0)) {
@@ -69,12 +86,10 @@ $(document).ready(function () {
 		}
 		resetRocks();
 		resetItem('head');
-		resetItem('apple');
-		resetItem('banana');
+		resetFruits();
 		paintCanvas();
 		paintRocks();
-		paintApple();
-		paintBanana();
+		paintFruits();
 		paintTrail();
 		paintHead();
 		$("#score").html(body - 1); // prints updated score (body - defaulted count of 1)
@@ -86,26 +101,31 @@ $(document).ready(function () {
 		pastHead = { ...head };
 		hx += xd;
 		hy += yd;
-		testBoundaries();
-		testTreats();
-		testCannibalism();
-		testObstacles();
+		runTests();
 		head = { x: hx, y: hy };
+		updateUnique(head);
 
 		// creates tail on first game move
 		if (trail.length < 1) {
 			trail.push(pastHead);
+			updateUnique(pastHead);
 		}
 
 		updateSnake();
 		paintCanvas();
 		paintRocks();
-		paintApple();
-		paintBanana();
+		paintFruits();
 		paintTrail();
 		paintHead();
-		$("#score").html(body - 1); // prints updated score (body - defaulted count of 1)
+		$("#score").html(getScore()); // prints updated score (body - defaulted count of 1)
 		cycleActive = false;
+	}
+
+	function runTests() {
+		testFruits();
+		testBoundaries();
+		testCannibalism();
+		testObstacles();
 	}
 
 	/** Generates base unique coordinates */
@@ -124,19 +144,32 @@ $(document).ready(function () {
 		}
 	};
 
+	function getScore() {
+		let fruitMultipier = 1;
+		let wallMultiplier = 1;
+		let obstacleMultiplier = 1;
+		if (fruitSetting === 'bonus') fruitMultipier = .95;
+		if (fruitSetting === 'speed') fruitMultipier = .9;
+		if (wallSetting === '0ff') wallMultiplier = .6;
+		if (obstacleSetting > 0) {
+			obstacleMultiplier = obstacleMultiplier + (obstacleSetting * .15);
+			if (wallMultiplier === 1) obstacleMultiplier = obstacleMultiplier + .2;
+		}
+		const scale = (fruitMultipier + wallMultiplier + obstacleMultiplier) / 3
+		const score = Math.floor(((body - 1) * scale) * 10);
+		return score || 0;
+	}
+
 	/** 
 	 * Returns an array of coordinates representing a rock 
 	 * @param {object{}} coors base unique coordinates 
 	 */
-	var makeRock = coors => {
-		const { x, y } = coors;
-		return [
-			{ x, y },
-			{ x: x + bl, y },
-			{ x, y: y + bl },
-			{ x: x + bl, y: y + bl }
-		]
-	};
+	var makeRock = ({ x, y }) => ([
+		{ x, y },
+		{ x: x + bl, y },
+		{ x, y: y + bl },
+		{ x: x + bl, y: y + bl }
+	]);
 
 	/**
 	 * is key an arrow key or spacebar
@@ -226,7 +259,7 @@ $(document).ready(function () {
 	/** Resets the coordinates for rocks */
 	function resetRocks() {
 		rocks = [];
-		for (let i = 0; i < 3; i++) {
+		for (let i = 0; i < obstacleSetting; i++) {
 			const coors = generateCoors(true); // forRocks bool is true on rock formation
 			if (coors) {
 				const { x, y } = coors;
@@ -237,6 +270,16 @@ $(document).ready(function () {
 				rocks.push(rock);
 			}
 		}
+	}
+
+	function resetFruits() {
+		let fruitCount = 1;
+		if (fruitSetting === 'bonus') fruitCount = 2;
+		if (fruitSetting === 'speed') fruitCount = 3;
+
+		resetItem('apple');
+		if (fruitCount > 1) resetItem('banana');
+		if (fruitCount > 2) resetItem('orange');
 	}
 
 	function resetItem(item) {
@@ -252,6 +295,10 @@ $(document).ready(function () {
 			banana = generateCoors();
 			bx = banana.x;
 			by = banana.y;
+		} else if (item === 'orange') {
+			orange = generateCoors();
+			ox = orange.x;
+			oy = orange.y;
 		}
 	}
 
@@ -270,6 +317,12 @@ $(document).ready(function () {
 		ctx.fillRect(0, 0, 400, 320);
 	}
 
+	function paintFruits() {
+		if (apple) paintApple();
+		if (banana) paintBanana();
+		if (orange) paintOrange();
+	}
+
 	function paintApple() {
 		grd = ctx.createRadialGradient(ax + 10, ay + 10, 0, ax + 10, ay + 10, bl); //prints current apple over latest canvas
 		grd.addColorStop(0, "red");
@@ -279,11 +332,19 @@ $(document).ready(function () {
 	}
 
 	function paintBanana() {
-		grd = ctx.createRadialGradient(bx + 10, by + 10, 0, bx + 10, by + 10, bl); //prints current banana over latest canvas
+		grd = ctx.createRadialGradient(bx + 10, by + 10, 0, bx + 10, by + 10, bl); //prints current banana, orange over latest canvas
 		grd.addColorStop(0, "yellow");
 		grd.addColorStop(1, "black");
 		ctx.fillStyle = grd;
 		ctx.fillRect(bx, by, bl, bl);
+	}
+
+	function paintOrange() {
+		grd = ctx.createRadialGradient(ox + 10, oy + 10, 0, ox + 10, oy + 10, bl); //prints current banana, orange over latest canvas
+		grd.addColorStop(0, "orange");
+		grd.addColorStop(1, "black");
+		ctx.fillStyle = grd;
+		ctx.fillRect(ox, oy, bl, bl);
 	}
 
 	function paintRocks() {
@@ -313,40 +374,47 @@ $(document).ready(function () {
 		ctx.fillRect(hx, hy, bl, bl);
 	}
 
-	function testTreats() {
-		if (hx === ax && hy === ay) { // if the head touches the apple, coors are randomized, body is allows one more block
+	function testFruits() {
+		if (hx === ax && hy === ay) {
 			body++;
 			resetItem('apple');
-		} else if (hx === bx && hy === by) { // if the head touches the banana, coors are randomized, body is allowed two more blocks
+		} else if (banana && hx === bx && hy === by) {
 			body = body + 3;
 			resetItem('banana');
+		} else if (orange && hx === ox && hy === oy) {
+			body = body + 5;
+			resetItem('orange');
 		}
 	}
 
 	function testBoundaries() {
-		const easy = wallMode === 1;
-		const standard = wallMode === 2;
+		const easy = wallSetting === 'off';
+		const standard = wallSetting === 'on';
 		if (hx === 400) { // edge conditionals, used to be set to wrap around but are new set to recycle game.
 			if (easy) {
 				hx = 0;
+				runTests();
 			} else if (standard) {
 				endGame();
 			}
 		} else if (hx === -20) {
 			if (easy) {
 				hx = 380;
+				runTests();
 			} else if (standard) {
 				endGame();
 			}
 		} else if (hy === 320) {
 			if (easy) {
 				hy = 0;
+				runTests();
 			} else if (standard) {
 				endGame();
 			}
 		} else if (hy === -20) {
 			if (easy) {
 				hy = 300;
+				runTests();
 			} else if (standard) {
 				endGame();
 			}

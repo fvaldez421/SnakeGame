@@ -16,9 +16,8 @@
 		<div class="col-md-8 ml-auto mr-auto">
 			<h2>This is Snake!</h2>
 			<hr class="my-4">
-			<p>Use the arrow keys to start the game and navigate the snake. Each red fruit you eat will grow your snake by one block.
-				Each yellow will grow it by two. Be careful not to bite your tail, hit a rock or hit an edge, the game will be completely
-				reset.
+			<p>It's a classic game of snake with a few extra twists! Use the settings menu on the left of the map to change the difficulty.
+				Keep in mind changing the settings will affect your final score in a positive or negative way.
 			</p>
 		</div>
 	</div>
@@ -49,13 +48,13 @@
 							<select id="wallSelect" class="custom-select">
 								<option selected value="off">Off</option>
 								<option value="on">On</option>
-								<option value="tunnels">Tunnels</option>
+								<!-- <option value="tunnels">Tunnels</option> -->
 							</select>
 						</div>
 						<div class="form-group mb-3">
 							<label class="mb-1" for="obstacleSelect">Obstacles:</label>
 							<select id="obstacleSelect" class="custom-select">
-								<option selected value="off">Off</option>
+								<option selected value="0">0</option>
 								<option value="1">1</option>
 								<option value="2">2</option>
 								<option value="3">3</option>
@@ -63,20 +62,20 @@
 								<option value="5">5</option>
 							</select>
 						</div>
-						<button id="optionsComplete" class="btn btn-primary">Done</button>
+						<button id="optionsComplete" class="btn btn-primary">Start</button>
 					</div>
 				</div>
 
 				<div class="optionsContainer collapseY">
 					<div>
-						<h6 class="mb-1">Fruits:
-							<span id="fruitLabel"></span>
+						<h6 class="gameOptions mb-2">Fruits:
+							<span id="fruitHolder">normal</span>
 						</h6>
-						<h6 class="mb-1">Walls:
-							<span id="wallLabel"></span>
+						<h6 class="gameOptions mb-2">Walls:
+							<span id="wallHolder">off</span>
 						</h6>
-						<h6 class="mb-1">Obstacles:
-							<span id="obstacleLabel"></span>
+						<h6 class="gameOptions mb-2">Obstacles:
+							<span id="obstacleHolder">0</span>
 						</h6>
 					</div>
 				</div>
@@ -84,8 +83,8 @@
 
 			<div class="gameContainer">
 				<div id="instructions">
-					Press the Spacebar or click the "Start" button to start a new game.
-					Then use an arrow key to move your snake!
+					Click the "Start" button to start or reset the game,
+					then use an arrow key to move your snake!
 				</div>
 				<canvas id="canv" height="320" width="400">
 				</canvas>

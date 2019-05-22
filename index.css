@@ -6,19 +6,19 @@
 .collapseY {
     height: 0%!important;
     overflow: hidden;
-    -moz-transition: height 1s ease;
-    -webkit-transition: height 1s ease;
-    -o-transition: height 1s ease;
-    transition: height 1s ease;
+    -moz-transition: height .25s ease;
+    -webkit-transition: height .25s ease;
+    -o-transition: height .25s ease;
+    transition: height .25s ease;
 }
 
 .expandY{
     height: 100%!important;
     overflow: hidden;
-    -moz-transition: height 2s ease;
-    -webkit-transition: height 2s ease;
-    -o-transition: height 2s ease;
-    transition: height 2s ease;
+    -moz-transition: height .5s ease;
+    -webkit-transition: height .5s ease;
+    -o-transition: height .5s ease;
+    transition: height .5s ease;
 }
 
 .jumbotron {
@@ -107,12 +107,19 @@
     position: absolute;
     width: 100%;
     bottom: 0px;
+    padding: 5px;
 }
 
 .optionsContainer > div {
     position: absolute;
     width: 100%;
-    bottom: calc(100% - 102px);
+    bottom: calc(100% - 130px);
+    padding: 8px;
+}
+
+.gameOptions span {
+    float: right;
+    text-transform: capitalize;
 }
 .gameContainer {
     position: relative;
