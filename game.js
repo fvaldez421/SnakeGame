@@ -14,6 +14,7 @@ $(document).ready(function () {
 	const downArrow = 40;
 
 	let gameInterval;
+	let gameOn = false;
 	let cycleActive = false;
 
 	let fruitSetting = 'normal';
@@ -89,13 +90,14 @@ $(document).ready(function () {
 	$(document).on("keydown", function (event) {
 		const { keyCode } = event;
 		if (!gameInterval && keyCode === spaceBar) {
-			if (!gameInterval) {
+			if (!gameInterval && gameOn) {
 				start();
 			}
 		} else if (isGameKey(keyCode)) {
 			if (keyCode === spaceBar && (xd !== 0 || yd !== 0)) {
 				pause();
 			} else if (keyCode !== spaceBar) {
+				gameOn = true;
 				return newDir(event);
 			}
 		}
