@@ -26,7 +26,7 @@ $(document).ready(function () {
     let immediateAction;
     let delayOption;
     const localMenuState = menuOpen;
-    const buttonClass = !localMenuState ? 'chevronUp' : 'chevronDown';
+    const buttonClass = !localMenuState ? 'chevronDown' : 'chevronUp';
     menuToggle.children('span').attr('class', buttonClass);
 
     const toggleSelect = () => {
